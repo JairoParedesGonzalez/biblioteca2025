@@ -6,6 +6,7 @@ package es.educastur.fuc29945.biblioteca2025;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.Scanner;
 
 /**
@@ -23,9 +24,9 @@ public class Biblioteca2025 {
     public static void main(String[] args) {
         //Biblioteca2025.cargaDatos();
         cargaDatosPrueba();
-        menu();
-        
-        
+        //menu();
+        //listadosConStreams();
+        ordenarConStreams();
         
     }
     public static void cargaDatosPrueba() {
@@ -110,6 +111,7 @@ public class Biblioteca2025 {
         prestamosHistorico.add(new Prestamo(libros.get(7),usuarios.get(2), hoy.minusDays(15),hoy));
         prestamosHistorico.add(new Prestamo(libros.get(6),usuarios.get(3), hoy.minusDays(15),hoy));
 }
+    //<editor-fold defaultstate="collapsed" desc="Menus">
     public static void menu(){
         int opcion=0;
         do{
@@ -286,6 +288,8 @@ public class Biblioteca2025 {
             }
         }while (opcion != 10);
     }
+//</editor-fold>
+    //<editor-fold defaultstate="collapsed" desc="Gestion Libro">
     private static void nuevoLibro () {
         System.out.println("Dame el titulo del libro");
         String titulo= sc.next();
@@ -296,40 +300,6 @@ public class Biblioteca2025 {
         System.out.println("Dame el genero");
         String genero=sc.next();
         libros.add(new Libro(isbn, titulo, autor, genero, 1));
-    }
-    private static int buscarLibro(String isbn) {
-        int posicion = -1;
-        int i = 0;
-        for (Libro l : libros) {
-            if (l.getIsbn().equalsIgnoreCase(isbn)) {
-                posicion = i;
-                break;
-            }
-            i++;
-        }
-        return posicion;
-    }
-    private static int buscarUsuario (String dni){
-        int posicion = -1;
-        int i = 0;
-        for (Usuario u : usuarios) {
-            if (u.getDni().equalsIgnoreCase(dni)) {
-                posicion = i;
-                break;
-            }
-            i++;
-        }
-        return posicion;
-    }
-    private static int buscaPrestamo(String dni, String isbn){
-        int pos=-1;
-        for (int i = 0; i < prestamos.size(); i++) {
-            if (prestamos.get(i).getUsuarioPrestado().getDni().equals(dni) && prestamos.get(i).getLibroPrestado().getIsbn().equals(isbn)){   
-                pos=i;
-                break;
-            }
-        }
-        return pos;       
     }
     private static void eliminarLibro(){
         /*ArrayList<Libro> librosBorrar=new ArrayList();
@@ -381,11 +351,53 @@ public class Biblioteca2025 {
             libros.get(p).setEjemplares(ejemplares);
         }
     }
+    //</editor-fold>
+    //<editor-fold defaultstate="collapsed" desc="Metodos de busqueda">
+    private static int buscarLibro(String isbn) {
+        int posicion = -1;
+        int i = 0;
+        for (Libro l : libros) {
+            if (l.getIsbn().equalsIgnoreCase(isbn)) {
+                posicion = i;
+                break;
+            }
+            i++;
+        }
+        return posicion;
+    }
+    private static int buscarUsuario (String dni){
+        int posicion = -1;
+        int i = 0;
+        for (Usuario u : usuarios) {
+            if (u.getDni().equalsIgnoreCase(dni)) {
+                posicion = i;
+                break;
+            }
+            i++;
+        }
+        return posicion;
+    }
+    private static int buscaPrestamo(String dni, String isbn){
+        int pos=-1;
+        for (int i = 0; i < prestamos.size(); i++) {
+            if (prestamos.get(i).getUsuarioPrestado().getDni().equals(dni) && prestamos.get(i).getLibroPrestado().getIsbn().equals(isbn)){   
+                pos=i;
+                break;
+            }
+        }
+        return pos;       
+    }
+    //</editor-fold>
+    //<editor-fold defaultstate="collapsed" desc="Gestion de usuario">
     private static void nuevoUsuario(){
         System.out.println("Ingrese su nombre");
         String nombre=sc.next();
-        System.out.println("Ingrese su dni");
-        String dni=sc.next();
+        String dni;
+        do {            
+            System.out.println("Ingrese su dni");
+            dni=sc.next();
+        } while (!MetodosAuxiliares.validarDNI(dni));
+        System.out.println("El dni correcto es "+dni);
         System.out.println("Ingrese su nº de telefono");
         String telefono=sc.next();
         System.out.println("Ingrese su email");
@@ -429,6 +441,8 @@ public class Biblioteca2025 {
             System.out.println(u.getDni()+"-"+u.getNombre()+"-"+u.getEmail()+"-"+u.getTelefono());
         }
     }
+//</editor-fold>
+    //<editor-fold defaultstate="collapsed" desc="Gestion de prestamos">
     private static void nuevoPrestamo(){
         int posicionUsuario, posicionLibro;
         System.out.print("Teclea DNI del usuario:");
@@ -485,6 +499,8 @@ public class Biblioteca2025 {
 
         }
     }
+//</editor-fold>
+    //<editor-fold defaultstate="collapsed" desc="Listados especiales">
     private static void listaPrestamosUsuario() {
         System.out.print("DNI usuario para consultar prestamos:");
         String dni=sc.next();
@@ -691,5 +707,63 @@ public class Biblioteca2025 {
         }
         return posicion;
     }
+    //</editor-fold>
+    //<editor-fold defaultstate="collapsed" desc="Listados con Streams">
+    public static void listadosConStreams(){
+        //LISTADO GENERAL
+        System.out.println("Listado de libros usando streams:");
+        libros.stream().forEach(l->System.out.println(l));
+        System.out.println("\nListado de usuarios con streams");
+        usuarios.stream().forEach(u->System.out.println(u));
+        //LISTADO FILTRADOS
+        System.out.println("\nLista solo los libros de Aventuras y JRR Tolkien");
+        libros.stream().filter(l->l.getGenero().equalsIgnoreCase("aventuras")
+                && l.getAutor().equalsIgnoreCase("jrr tolkien"))
+                .forEach(l->System.out.println(l));
+        System.out.println("\nLista solo los libros de Novela nega o JRR Tolkien");
+        libros.stream().filter(l->l.getGenero().equalsIgnoreCase("novela negra")
+                || l.getAutor().equalsIgnoreCase("jrr tolkien"))
+                .forEach(l->System.out.println(l));
+        System.out.println("\nLibros fuera de plazo");
+        prestamos.stream().filter(p->p.getFechaDevolucion().isBefore(LocalDate.now())).forEach(p->System.out.println(p));
+        System.out.println("\nPrestamos de alguien introducido por teclado");
+        String nombre=sc.next();
+        prestamos.stream().filter(p->p.getUsuarioPrestado().getNombre().equalsIgnoreCase(nombre)).forEach(p->System.out.println(p));
+        prestamosHistorico.stream().filter(p->p.getUsuarioPrestado().getNombre().equalsIgnoreCase(nombre)).forEach(p->System.out.println(p));
+        System.out.println("\nPrestamos de aventuras actualmente prestados");
+        prestamos.stream().filter(p->p.getLibroPrestado().getGenero().equalsIgnoreCase("aventuras")
+                && p.getFechaDevolucion().isAfter(LocalDate.now())).forEach(p->System.out.println(p));
+            }
+    public static void ordenarConStreams(){
+        System.out.println("LISTADO DE LIBROS ORDENADOS ALFABETICAMENTE POR TITULO:");
+        libros.stream().sorted(Comparator.comparing(Libro::getTitulo)).forEach(l->System.out.println(l));
+        System.out.println("\nLISTADO DE LIBROS ORDENADOS POR UNIDADES DE MAYOR A MENOR:");
+        libros.stream().sorted(Comparator.comparing(Libro::getEjemplares).reversed()).forEach(l->System.out.println(l));
+        System.out.println("\nLISTADO DE LIBROS ORDENADOS POR ISBN:");
+        libros.stream().sorted(Comparator.comparing(Libro::getIsbn)).forEach(l->System.out.println(l));
+        System.out.println("\nPrestamos ordenados por fecha de prestamo de más nuevo a mas antiguo");
+        prestamos.stream().sorted(Comparator.comparing(Prestamo::getFechaPrestamo).reversed()).forEach(p->System.out.println(p));
+        System.out.println("\nPrestamos ordenados por fecha de prestamo de más antiguo a mas nuevo");
+        prestamos.stream().sorted(Comparator.comparing(Prestamo::getFechaPrestamo)).forEach(p->System.out.println(p));
+        System.out.println("\nListado de libros por numero de prestamos de mayor a menor");
+        libros.stream().sorted(Comparator.comparing(l->numPrestamosLibro((Libro)l)).reversed())
+                .forEach(l->System.out.println(l+" tiene "+numPrestamosLibro(l)+" prestamos"));
+    }
+    public static int numPrestamosLibro(Libro l){
+        int contador=0;
+        for (Prestamo p : prestamos) {
+            if (p.getLibroPrestado().equals(l)) {
+                contador++;
+            }
+        }
+        for (Prestamo p : prestamosHistorico) {
+            if (p.getLibroPrestado().equals(l)) {
+                contador++;
+            }
+        }
+        return contador;
+    }
+    //</editor-fold>
+    
     
 }
